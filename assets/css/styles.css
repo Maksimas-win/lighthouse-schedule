@@ -36,9 +36,9 @@ h1 em { font-weight: 400; color: var(--gold); }
 .intro { margin: 21px 0 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
 .intro strong { color: var(--text); font-weight: 400; }
 
-.lighthouse-scene { position: relative; isolation: isolate; height: clamp(350px, calc(100svh - 330px), 570px); max-width: 1100px; margin: 3px auto 0; }
+.lighthouse-scene { position: relative; isolation: isolate; height: clamp(350px, calc(100svh - 330px), 570px); max-width: 1100px; margin: 3px auto 0; clip-path: inset(-30% -2% -12% -2%); }
 .lighthouse { position: absolute; left: 25%; top: 0; height: 100%; width: auto; transform: translateX(-50%); object-fit: contain; mix-blend-mode: screen; pointer-events: none; z-index: 2; }
-.light-beam { position: absolute; left: 25%; top: -12%; width: 65%; height: 58%; transform-origin: 0 50%; background: transparent; filter: blur(9px); opacity: .85; pointer-events: none; transition: opacity 1.8s ease, transform 2s var(--ease); }
+.light-beam { position: absolute; left: 25%; top: -12%; width: 65%; height: 58%; transform-origin: 0 50%; background: transparent; filter: blur(9px); opacity: .85; pointer-events: none; }
 .light-beam::after { content: ''; position: absolute; inset: 0; clip-path: polygon(0 50%, 100% 0, 100% 100%); background: linear-gradient(90deg, #ffefc7b0, #e6ad4550 25%, #bb822117 70%, transparent); }
 .lamp-glow { position: absolute; left: 25%; top: 17%; width: 26px; height: 26px; transform: translate(-50%, -50%); border-radius: 50%; background: #ffefc7; box-shadow: 0 0 22px 8px #eac07970, 0 0 65px 24px #c28c2330; filter: blur(5px); pointer-events: none; z-index: 3; transition: opacity 1.5s ease; }
 .schedule-preview { position: absolute; left: 62%; top: 11%; width: min(26%, calc((100svh - 380px) * .6)); min-width: 180px; max-width: 280px; z-index: 4; transition: opacity 1.25s ease, transform 1.4s var(--ease); }
@@ -50,12 +50,22 @@ h1 em { font-weight: 400; color: var(--gold); }
 .preview-hint { text-align: center; margin: 18px -15px 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
 .touch-hint { display: none; }
 .scene-baseline { position: absolute; bottom: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, #8470444d 40%, #84704429 65%, transparent); }
-.is-enhanced .light-beam { opacity: 0; transform: scaleY(.08); }
+.is-enhanced .light-beam { opacity: 0; transform: rotateY(180deg) rotateZ(-8deg) scaleY(.65); }
 .is-enhanced .lamp-glow { opacity: 0; }
 .is-enhanced .schedule-preview { opacity: 0; transform: translateX(-18px); visibility: hidden; }
-.is-enhanced.is-lit .light-beam { opacity: .85; transform: scaleY(1); }
-.is-enhanced.is-lit .lamp-glow { opacity: 1; }
+.is-enhanced.is-sweeping .light-beam { animation: lighthouse-sweep 4.8s ease-in-out both; transition: none; }
+.is-enhanced.is-lit .light-beam { opacity: .85; transform: none; }
+.is-enhanced.is-sweeping .lamp-glow, .is-enhanced.is-lit .lamp-glow { opacity: 1; }
 .is-enhanced.is-revealed .schedule-preview { opacity: 1; transform: translateX(0); visibility: visible; }
+
+@keyframes lighthouse-sweep {
+  0% { opacity: 0; transform: rotateY(180deg) rotateZ(-8deg) scaleY(.65); }
+  12% { opacity: .85; transform: rotateY(180deg) rotateZ(-8deg) scaleY(.65); }
+  35% { opacity: .85; transform: rotateY(135deg) rotateZ(-4deg) scaleY(.8); }
+  50% { opacity: .55; transform: rotateY(90deg) rotateZ(0deg) scaleY(.85); }
+  75% { opacity: .85; transform: rotateY(35deg) rotateZ(5deg) scaleY(.95); }
+  100% { opacity: .85; transform: rotateY(0deg) rotateZ(0deg) scaleY(1); }
+}
 
 .schedule-meta { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 0 30px; color: var(--muted); font-size: 14px; }
 .schedule-meta p { margin: 0; letter-spacing: .15em; color: var(--gold); }

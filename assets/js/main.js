@@ -2,6 +2,7 @@
 
 (() => {
   const scene = document.querySelector('#lighthouse-scene');
+  const beam = document.querySelector('.light-beam');
   const trigger = document.querySelector('#schedule-trigger');
   const thumbnail = document.querySelector('#schedule-thumbnail');
   const dialog = document.querySelector('#schedule-dialog');
@@ -21,10 +22,26 @@
   let previousFocus;
   let imageAnimation;
 
-  if (!reducedMotion.matches) {
-    scene.classList.add('is-enhanced');
-    window.setTimeout(() => scene.classList.add('is-lit'), 120);
-    window.setTimeout(() => scene.classList.add('is-revealed'), 1150);
+  if (beam && !reducedMotion.matches) {
+    const revealSchedule = () => {
+      beam.removeEventListener('animationend', finishSweep);
+      beam.removeEventListener('animationcancel', finishSweep);
+      reducedMotion.removeEventListener('change', handleMotionChange);
+      scene.classList.remove('is-sweeping');
+      scene.classList.add('is-lit', 'is-revealed');
+    };
+    const finishSweep = (event) => {
+      if (event.target === beam && event.animationName === 'lighthouse-sweep') revealSchedule();
+    };
+    const handleMotionChange = (event) => {
+      if (event.matches) revealSchedule();
+    };
+
+    // Reveal only after the beam finishes turning toward the schedule.
+    beam.addEventListener('animationend', finishSweep);
+    beam.addEventListener('animationcancel', finishSweep);
+    reducedMotion.addEventListener('change', handleMotionChange);
+    scene.classList.add('is-enhanced', 'is-sweeping');
   }
 
   const resetZoom = () => {
