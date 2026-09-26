@@ -22,26 +22,72 @@
   let previousFocus;
   let imageAnimation;
 
-  if (beam && !reducedMotion.matches) {
+  if (beam) {
+    const replayButton = document.querySelector('#replay-beam');
+    const lighthouse = document.querySelector('.lighthouse');
+    let started = false;
+    let imageReady = !lighthouse || lighthouse.complete;
+
     const revealSchedule = () => {
-      beam.removeEventListener('animationend', finishSweep);
-      beam.removeEventListener('animationcancel', finishSweep);
-      reducedMotion.removeEventListener('change', handleMotionChange);
-      scene.classList.remove('is-sweeping');
+      scene.classList.remove('is-sweeping', 'is-paused');
       scene.classList.add('is-lit', 'is-revealed');
+      if (replayButton) replayButton.disabled = false;
+    };
+    const startSweep = () => {
+      if (scene.classList.contains('is-sweeping')) return;
+      started = true;
+      if (reducedMotion.matches) {
+        revealSchedule();
+        return;
+      }
+      scene.classList.remove('is-lit', 'is-revealed');
+      scene.classList.add('is-enhanced', 'is-sweeping');
+      if (replayButton) replayButton.disabled = true;
+    };
+    const syncVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        if (scene.classList.contains('is-sweeping')) scene.classList.add('is-paused');
+        return;
+      }
+      scene.classList.remove('is-paused');
+      if (!started && imageReady) startSweep();
     };
     const finishSweep = (event) => {
-      if (event.target === beam && event.animationName === 'lighthouse-sweep') revealSchedule();
+      if (event.target === beam && event.animationName === 'lighthouse-sweep'
+        && scene.classList.contains('is-sweeping')) revealSchedule();
     };
     const handleMotionChange = (event) => {
-      if (event.matches) revealSchedule();
+      if (replayButton) replayButton.hidden = event.matches;
+      if (event.matches) {
+        started = true;
+        revealSchedule();
+      }
+    };
+    const handleImageReady = () => {
+      imageReady = true;
+      syncVisibility();
     };
 
-    // Reveal only after the beam finishes turning toward the schedule.
+    // Do not spend the entrance animation before the visitor can see it.
     beam.addEventListener('animationend', finishSweep);
     beam.addEventListener('animationcancel', finishSweep);
+    document.addEventListener('visibilitychange', syncVisibility);
     reducedMotion.addEventListener('change', handleMotionChange);
-    scene.classList.add('is-enhanced', 'is-sweeping');
+    if (replayButton) {
+      replayButton.hidden = reducedMotion.matches;
+      replayButton.addEventListener('click', startSweep);
+    }
+    if (!imageReady) {
+      lighthouse.addEventListener('load', handleImageReady, { once: true });
+      lighthouse.addEventListener('error', handleImageReady, { once: true });
+    }
+    if (reducedMotion.matches) {
+      started = true;
+      revealSchedule();
+    } else {
+      scene.classList.add('is-enhanced');
+      syncVisibility();
+    }
   }
 
   const resetZoom = () => {
